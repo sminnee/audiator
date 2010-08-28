@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	
 	// Initialise the piano roll
-	$(scale('c-3', 'c-5').reverse()).each(function(i,note) {
+	$(scale('c-2', 'c-4').reverse()).each(function(i,note) {
 		if(note == 'gap') {
 			$('#piano-roll').append('<div class="gap" />');
 		} else {
@@ -38,36 +38,44 @@ $(document).ready(function() {
 	var mute = 1;
 	
 	$('div.slider')
-		.slider()
+		.slider({value: 50})
 		.bind( "slide", function(event, ui) {
 			volume = ui.value / 100;
 		});
 	
-    // Create a new audio element
-    var audioOutput = new Audio();
-    // Set up audio element with 2 channel, 44.1KHz audio stream.
-    audioOutput.mozSetup(1, 44100);
+	try {
+    	// Create a new audio element
+    	var audioOutput = new Audio();
+	    // Set up audio element with 2 channel, 44.1KHz audio stream.
+	    audioOutput.mozSetup(1, 44100);
+	} catch(e) {}
 
 	var totalSent = 0;
 	
 	var suckSoundTimeout = null;
 	
 	
-	var bpm = 140;
+	var bpm = 140 * 4; // 2 steps per 140bpm beat
 	var audioInterval = 1000 * 60/bpm;
 	
 //	var audioInterval = 100;
 	var sampleSize = audioInterval/1000.0 * 44100;
 	var bufferSize = sampleSize * 2;
 	
+	
+	var currentStep = 0;
+	
     function suckSound() {
-		var totalRead = audioOutput.mozCurrentSampleOffset();
+			var totalRead = audioOutput.mozCurrentSampleOffset();
 		
-		if(totalSent - totalRead  < bufferSize) {
-    		var samples = mute ? silence(sampleSize) : sawtooth(sampleSize, 440, volume, 0.9999);
-        	audioOutput.mozWriteAudio(samples);
-			totalSent += samples.length;
-		}
+			if(totalSent - totalRead  < bufferSize) {
+	    		var samples = mute ? silence(sampleSize) : soundForStep(sampleSize, currentStep);
+				if(length in samples) audioOutput.mozWriteAudio(samples);
+				else console.log('bad samples', samples);
+				totalSent += samples.length;
+			}
+
+		currentStep = (currentStep + 1) % 16;
     }
 	setInterval(suckSound, audioInterval);
 
@@ -77,9 +85,29 @@ $(document).ready(function() {
 	})
 	$('#start').click(function() {
 		mute = 0;
+		currentStep = 0;
 		return false;
 	})
+
+	/**
+	 * Get the sound for the current step
+	 */
+	function soundForStep(sampleSize, step) {
+		var notes = notesForStep(step); 
+		if(notes && notes.length > 0) {
+			var note = notes[0];
+			return sawtooth(sampleSize, hertzForNote(note.noteStr), volume, 0.999);
+		} else {
+			return silence(sampleSize);
+		}
+	}
+
 });
+
+
+// 
+
+
 
 	function silence(samples) {
 		output = [];
@@ -107,8 +135,11 @@ $(document).ready(function() {
 /**
  * Save a track via local storage
  */
+
+var currentNotes = [];
+
 function saveTrack() {
-	var notes = []
+	var notes = [];
 	$('#piano-roll span.step.on').each(function() {
 		notes.push({ step: $(this).data('step'), noteStr: $(this).parent().data('noteStr') });
 	});
@@ -117,6 +148,8 @@ function saveTrack() {
 		version : 'v2',
 		notes : notes,
 	};
+	
+	currentNotes = notes;
 
 	window.localStorage.setItem('audiator-track', JSON.stringify(track));
 }
@@ -134,10 +167,18 @@ function loadTrack() {
 					.click();
 			});
 			
+			currentNotes = track.notes;
 		} else {
 			throw "Bad version " + track.version;
 		}
 	}
+}
+
+/**
+ * Get all the notes for a single step
+ */
+function notesForStep(step) {
+	return $.grep(currentNotes, function (note) { return note.step == step; });
 }
 
 
