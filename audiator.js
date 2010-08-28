@@ -1,5 +1,26 @@
 $(document).ready(function() {
 	
+	// Initialise the piano roll
+	$(scale('c-3', 'c-5').reverse()).each(function(i,note) {
+		if(note == 'gap') {
+			$('#piano-roll').append('<div class="gap" />');
+		} else {
+			var cssClass = note.note.replace('#', ' sharp');
+			var $newItem = $('<div class="' + cssClass + '"><span class="key">&nbsp;</span></div>');
+			
+			for(var i=0;i<16;i++) {
+				$newItem.append($('<span class="step step-' + i + '">&nbsp</span>'));
+			}
+			
+			$('#piano-roll').append($newItem);
+		}
+	});
+	
+	$('#piano-roll .step').click(function() {
+		if($(this).hasClass('on')) $(this).removeClass('on');
+		else $(this).addClass('on');
+	});
+	
 	var volume = 0;
 	var mute = 1;
 	
@@ -45,7 +66,8 @@ $(document).ready(function() {
 		mute = 0;
 		return false;
 	})
-    
+});
+
 	function silence(samples) {
 		output = [];
 		for(var i=0;i<samples;i++) output.push(0);
@@ -68,4 +90,68 @@ $(document).ready(function() {
         }
 		return output;
     }
-});
+
+/**
+ * Pass a note range, for example  scale('c-0', 'c-1') and get a map of note-name -> hertz
+ * If includeGaps is true then gap markers will be included
+ */
+function scale(start, end, includeGaps) {
+	// Base notes, including gaps
+	var notes = [ 'a', 'a#', 'b', 'gap', 'c', 'c#', 'd', 'd#', 'e', 'gap', 'f', 'f#', 'g', 'g#' ];
+	
+	if(!start.match(/([a-z]#?)-([0-9])/)) throw "Bad start '" + start + "'";
+	var startName = RegExp.$1;
+	var startOctave = RegExp.$2;
+	if(!end.match(/([a-z]#?)-([0-9])/)) throw "Bad end '" + end + "'";
+	var endName = RegExp.$1;
+	var endOctave = RegExp.$2;
+	
+	// Starting note
+	var curNote = 0;
+	var curNoteStr;
+	while(notes[curNote] != startName) curNote++;
+	
+	var output = [];
+
+	var octave = startOctave;
+	while(true) {
+		if(notes[curNote] == 'gap') {
+			output.push('gap');
+		} else {
+			curNoteStr = notes[curNote] + '-' + octave;
+			output.push( {str : curNoteStr, hertz: hertzForNote(curNoteStr), note: notes[curNote], octave: octave } );
+		}
+		if(octave >= endOctave && notes[curNote] == endName) break;
+		curNote = (curNote + 1) % notes.length;
+		if(curNote == 0) octave++;
+	}
+	
+	return output;
+	
+}
+
+
+
+/**
+ * Pass a note, eg, 'c#-0' and get the hertz
+ */
+function hertzForNote(note) {
+	// Base notes (octave #3)
+	var base = {
+		'a' : 440.00, 'a#' : 466.16, 'b' : 493.88, 'c' : 523.25, 'c#' : 554.37, 'd' : 587.33,
+		'd#' : 622.25, 'e' : 659.25, 'f' : 698.46, 'f#' : 739.99, 'g' : 783.99, 'g#' : 830.61,
+		'a' : 880.00
+	};
+	
+	if(!note.match(/([a-z]#?)-([0-9])/)) throw "Bad note '" + note + "'";
+	
+	var name = RegExp.$1;
+	var octave = parseInt(RegExp.$2);
+	
+	var multiplier = 1/8; // the multiplier of octave 0
+	while(octave-- > 0) multiplier *=2; // find the desired multiplier
+	
+	return base[name] * multiplier;
+}
+
+
