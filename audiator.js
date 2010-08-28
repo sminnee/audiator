@@ -7,9 +7,13 @@ $(document).ready(function() {
 		} else {
 			var cssClass = note.note.replace('#', ' sharp');
 			var $newItem = $('<div class="' + cssClass + '"><span class="key">&nbsp;</span></div>');
+			$newItem.data('noteStr', note.str);
+			$newItem.data('hertz', note.hertz);
 			
 			for(var i=0;i<16;i++) {
-				$newItem.append($('<span class="step step-' + i + '">&nbsp</span>'));
+				var $newStep = $('<span class="step step-' + i + '">&nbsp</span>');
+				$newStep.data('step', i);
+				$newItem.append($newStep);
 			}
 			
 			$('#piano-roll').append($newItem);
@@ -19,7 +23,16 @@ $(document).ready(function() {
 	$('#piano-roll .step').click(function() {
 		if($(this).hasClass('on')) $(this).removeClass('on');
 		else $(this).addClass('on');
+		
+		saveTrack();
 	});
+	
+	// Load a track
+	try {
+		loadTrack();
+	} catch(e) {
+		alert("Sorry, can't load your song: " + e);
+	}
 	
 	var volume = 0;
 	var mute = 1;
@@ -90,6 +103,43 @@ $(document).ready(function() {
         }
 		return output;
     }
+
+/**
+ * Save a track via local storage
+ */
+function saveTrack() {
+	var notes = []
+	$('#piano-roll span.step.on').each(function() {
+		notes.push({ step: $(this).data('step'), noteStr: $(this).parent().data('noteStr') });
+	});
+	
+	var track = {
+		version : 'v2',
+		notes : notes,
+	};
+
+	window.localStorage.setItem('audiator-track', JSON.stringify(track));
+}
+
+/**
+ * Load a track from local storage
+ */
+function loadTrack() {
+	var storage = window.localStorage.getItem('audiator-track');
+	if(storage) {
+		var track = JSON.parse(storage);
+		if(track.version == 'v2') {
+			$(track.notes).each(function(i, note) {
+				$("#piano-roll div:data('noteStr=" + note.noteStr +"') span:data('step=" + note.step + "')")
+					.click();
+			});
+			
+		} else {
+			throw "Bad version " + track.version;
+		}
+	}
+}
+
 
 /**
  * Pass a note range, for example  scale('c-0', 'c-1') and get a map of note-name -> hertz
