@@ -34,7 +34,7 @@ $(document).ready(function() {
 		alert("Sorry, can't load your song: " + e);
 	}
 	
-	var volume = 50;
+	var volume = 0.5;
 	var mute = 1;
 	
 	$('div.slider')
