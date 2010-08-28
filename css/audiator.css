@@ -62,10 +62,9 @@ body{
 	margin-bottom: -1px;
 	height: 22px;
 	position: relative;
-	margin-left: 100px;
+	margin-left: 130px;
 }
 #piano-roll > div.gap {
-  border-top: 1px solid #888;
 }
 
 	#piano-roll > div span.key {
@@ -73,7 +72,7 @@ body{
 		position: absolute;
 		width: 130px;
 		height: 41px;
-		left: -100px;
+		left: -130px;
 		top: -10px;
 		border: 1px solid #555;
 		z-index: 100;
@@ -103,10 +102,12 @@ body{
 	#piano-roll > div span.step {
 		display: block;
 		float: left;
-		border-left: 1px #888 solid;
+		border-right: 1px #888 solid;
+		border-bottom: 1px #888 solid;
 		border-top: 1px #888 solid;
 		width: 40px;
 		height: 20px;
+		margin-bottom: -1px;
 		cursor: pointer;
 		-moz-user-select: none;
 	}
