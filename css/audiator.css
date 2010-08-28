@@ -8,7 +8,7 @@ body,html{
 }
 
 body{
-  font: 0.9em normal helvetica, sans-serif;
+  font: 0.8em normal helvetica, sans-serif;
 }
 
 #header{
@@ -19,7 +19,7 @@ body{
   left: 0;
   right: 0;
   z-index: 1000;
-  border-bottom: 1px solid #777;
+  border-bottom: 1px solid #999;
 }
 
 
@@ -42,18 +42,6 @@ body{
   left: 2px;
 }
 
-#footer{
-  background: -moz-linear-gradient(-90deg, #333, #444);
-  border-top: 1px solid #777;
-  -moz-box-shadow: 0 -10px 20px rgba(0,0,0,0.3);
-  position: absolute;
-  bottom: 0;
-  height: 1000;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
 
 
 #main{
@@ -62,7 +50,7 @@ body{
   left: 0;
   width: 30000px;
   height: 1000px;
-  background: #ccc;
+  background: #aaa;
 }
 
 #piano-roll {
@@ -77,7 +65,7 @@ body{
 	margin-left: 100px;
 }
 #piano-roll > div.gap {
-	background-color: #CCC;
+  border-top: 1px solid #888;
 }
 
 	#piano-roll > div span.key {
@@ -115,13 +103,61 @@ body{
 	#piano-roll > div span.step {
 		display: block;
 		float: left;
-		color: #777;
-		border: 1px #999 solid;
+		border-left: 1px #888 solid;
+		border-top: 1px #888 solid;
 		width: 40px;
-		height: 18px;
-		
+		height: 20px;
+		cursor: pointer;
+		-moz-user-select: none;
 	}
 		#piano-roll > div span.step.on {
-			background-color: #070;
+			background-color: #333;
+			border-color: #222;
+			-moz-border-radius: 2px;
+			border: none;
+			height: 21px;
+			width: 41px;
 		}
 	
+	
+  #footer{
+    background: -moz-linear-gradient(-90deg, #333, #444);
+    border-top: 1px solid #777;
+    -moz-box-shadow: 0 -5px 10px rgba(0,0,0,0.3);
+    position: absolute;
+    bottom: 0;
+    height: 1000;
+    left: 0;
+    right: 0;
+    height: 70px;
+    z-index: 1000;
+  }
+
+	
+	.volume-control{
+	  position: absolute;
+	  left: 300px;
+	  top: 10px;
+	  border: 1px solid #222;
+	  background: #333;
+	  padding: 5px;
+	  -moz-border-radius: 3px;
+	  -moz-box-shadow: -1px -1px 3px #555;
+	  width: 500px;
+	  height: 40px;
+	}
+	
+	.volume-control p{
+	  width: 120px;
+	  line-height: 20px;
+	  text-align: center;
+	  font-weight: bold;
+	  color: #111;
+	  text-shadow: 0 -1px 0 rgba(255,255,255,0.2);
+	}
+	#volume{
+	  width: 200px;
+	  position: absolute;
+	  left: 150px;
+	  top: 20px;
+	}
